@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Your AI Interview Coach dashboard — track your progress and start new practice sessions.">
+  <title>Dashboard — InterviewAI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages/dashboard.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%237c5cfc'/><text x='16' y='23' text-anchor='middle' fill='white' font-size='18' font-weight='bold'>AI</text></svg>">
+</head>
+<body>
+  <div class="animated-bg"></div>
+  <div class="page-wrapper">
+    <!-- Navbar injected by JS -->
+    <div id="navbar-container"></div>
+
+    <main class="page-content">
+      <div class="container">
+        <!-- Header -->
+        <div class="dashboard-header animate-fade-in-up">
+          <div class="dashboard-greeting">
+            <h1 id="greeting-text">Good morning 👋</h1>
+            <p id="greeting-subtitle">Ready to ace your next interview?</p>
+          </div>
+          <a href="/setup.html" class="btn btn-primary btn-lg" id="start-session-btn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            Start New Session
+          </a>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-grid" id="stats-grid">
+          <div class="card stat-card animate-fade-in-up stagger-1">
+            <div class="stat-icon purple">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+            <div class="stat-value" id="stat-sessions">
+              <span class="skeleton skeleton-text sm"></span>
+            </div>
+            <div class="stat-label">Total Sessions</div>
+          </div>
+          <div class="card stat-card animate-fade-in-up stagger-2">
+            <div class="stat-icon blue">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+            </div>
+            <div class="stat-value" id="stat-avg-score">
+              <span class="skeleton skeleton-text sm"></span>
+            </div>
+            <div class="stat-label">Average Score</div>
+          </div>
+          <div class="card stat-card animate-fade-in-up stagger-3">
+            <div class="stat-icon green">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5C5.71 4 7 5.29 7 6.5V8"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5C18.29 4 17 5.29 17 6.5V8"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+            </div>
+            <div class="stat-value" id="stat-best-score">
+              <span class="skeleton skeleton-text sm"></span>
+            </div>
+            <div class="stat-label">Best Score</div>
+          </div>
+          <div class="card stat-card animate-fade-in-up stagger-4">
+            <div class="stat-icon orange">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+            <div class="stat-value" id="stat-questions">
+              <span class="skeleton skeleton-text sm"></span>
+            </div>
+            <div class="stat-label">Questions Answered</div>
+          </div>
+        </div>
+
+        <!-- Main Grid -->
+        <div class="dashboard-grid">
+          <!-- Progress Chart -->
+          <div class="card chart-card animate-fade-in-up stagger-3">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Progress Over Time</div>
+                <div class="card-subtitle">Your score trend across sessions</div>
+              </div>
+            </div>
+            <div class="chart-container" id="chart-container">
+              <div class="skeleton skeleton-chart"></div>
+            </div>
+          </div>
+
+          <!-- Sidebar -->
+          <div class="flex flex-col gap-6">
+            <!-- Difficulty Suggestion -->
+            <div class="suggestion-card animate-fade-in-up stagger-4" id="suggestion-card">
+              <div class="suggestion-text">Based on your performance, we recommend:</div>
+              <div class="suggestion-level" id="suggested-difficulty">
+                <span class="skeleton skeleton-text md"></span>
+              </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card animate-fade-in-up stagger-5">
+              <div class="card-title" style="margin-bottom: var(--space-4);">Quick Actions</div>
+              <div class="quick-actions">
+                <a href="/setup.html" class="quick-action-btn">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                  New Session
+                </a>
+                <a href="/history.html" class="quick-action-btn">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  View History
+                </a>
+              </div>
+            </div>
+
+            <!-- Recent Sessions -->
+            <div class="card animate-fade-in-up stagger-6">
+              <div class="card-header">
+                <div class="card-title">Recent Sessions</div>
+                <a href="/history.html" class="btn btn-ghost btn-sm">View All</a>
+              </div>
+              <div class="sessions-list" id="recent-sessions">
+                <div class="skeleton" style="height:60px;border-radius:12px;margin-bottom:8px;"></div>
+                <div class="skeleton" style="height:60px;border-radius:12px;margin-bottom:8px;"></div>
+                <div class="skeleton" style="height:60px;border-radius:12px;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <!-- Chart.js (lazy) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js" defer></script>
+
+  <script type="module">
+    import { initDashboard } from './js/dashboard.js?v=3';
+    console.log('dashboard.html: Running initDashboard (v3)');
+    initDashboard();
+  </script>
+</body>
+</html>

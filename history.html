@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="View your past interview sessions and track progress.">
+  <title>Session History — InterviewAI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages/history.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%237c5cfc'/><text x='16' y='23' text-anchor='middle' fill='white' font-size='18' font-weight='bold'>AI</text></svg>">
+</head>
+<body>
+  <div class="animated-bg"></div>
+  <div class="page-wrapper">
+    <div id="navbar-container"></div>
+    <main class="page-content">
+      <div class="container">
+        <div class="history-header animate-fade-in-up">
+          <h1>Session <span class="text-gradient">History</span></h1>
+          <a href="/setup.html" class="btn btn-primary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            New Session
+          </a>
+        </div>
+
+        <!-- Filters -->
+        <div class="history-filters animate-fade-in-up stagger-2">
+          <select class="form-input form-select" id="filter-role" onchange="applyFilters()">
+            <option value="">All Roles</option>
+          </select>
+          <select class="form-input form-select" id="filter-difficulty" onchange="applyFilters()">
+            <option value="">All Difficulties</option>
+            <option value="easy">Easy</option>
+            <option value="medium">Medium</option>
+            <option value="hard">Hard</option>
+          </select>
+          <select class="form-input form-select" id="filter-sort" onchange="applyFilters()">
+            <option value="newest">Newest First</option>
+            <option value="oldest">Oldest First</option>
+            <option value="highest">Highest Score</option>
+            <option value="lowest">Lowest Score</option>
+          </select>
+        </div>
+
+        <!-- Progress Chart -->
+        <div class="card history-chart-card animate-fade-in-up stagger-3">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Progress Trend</div>
+              <div class="card-subtitle">Your scores over time</div>
+            </div>
+          </div>
+          <div class="history-chart-container">
+            <canvas id="history-chart"></canvas>
+          </div>
+        </div>
+
+        <!-- Sessions -->
+        <div class="history-list" id="history-list">
+          <div class="card skeleton skeleton-card"></div>
+          <div class="card skeleton skeleton-card"></div>
+          <div class="card skeleton skeleton-card"></div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination" id="pagination"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js" defer></script>
+  <script type="module">
+    import { initHistory } from './js/history.js';
+    initHistory();
+  </script>
+</body>
+</html>

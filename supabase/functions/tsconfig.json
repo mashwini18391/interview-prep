@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "strict": true,
+    "noImplicitAny": false,
+    "allowJs": true,
+    "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "baseUrl": ".",
+    "paths": {
+      "@supabase/supabase-js": ["https://esm.sh/@supabase/supabase-js@2.39.7"]
+    }
+  },
+  "include": [
+    "./**/*.ts",
+    "deno.d.ts"
+  ]
+}

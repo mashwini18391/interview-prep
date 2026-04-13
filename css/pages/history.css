@@ -1,0 +1,108 @@
+/* ── History Page ── */
+.history-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-8);
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+
+.history-header h1 {
+  font-size: var(--text-3xl);
+  font-weight: var(--font-bold);
+}
+
+.history-filters {
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-6);
+}
+
+.history-filters .form-select,
+.history-filters .form-input {
+  min-width: 160px;
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--text-sm);
+}
+
+/* History Chart */
+.history-chart-card {
+  margin-bottom: var(--space-8);
+}
+
+.history-chart-container {
+  position: relative;
+  height: 280px;
+}
+
+/* Session Cards */
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.history-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+  padding: var(--space-5);
+  transition: all var(--transition-fast);
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+}
+
+.history-item:hover {
+  transform: translateX(4px);
+  border-color: var(--border-hover);
+}
+
+.history-item .score-col {
+  flex-shrink: 0;
+}
+
+.history-item .info-col {
+  flex: 1;
+  min-width: 0;
+}
+
+.history-item .role-name {
+  font-weight: var(--font-semibold);
+  font-size: var(--text-base);
+  margin-bottom: var(--space-1);
+}
+
+.history-item .meta-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  flex-wrap: wrap;
+}
+
+.history-item .meta-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.history-item .arrow-col {
+  flex-shrink: 0;
+  color: var(--text-tertiary);
+}
+
+/* Empty state */
+.history-empty {
+  padding: var(--space-16) var(--space-8);
+}
+
+@media (max-width: 640px) {
+  .history-filters { flex-direction: column; }
+  .history-filters .form-select,
+  .history-filters .form-input { width: 100%; }
+  .history-item { flex-wrap: wrap; gap: var(--space-3); }
+}

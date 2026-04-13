@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <title>Supabase Debugger — InterviewAI</title>
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <style>
+    .debug-log { background: #1a1a2e; padding: 20px; border-radius: 12px; font-family: monospace; line-height: 1.5; color: #a0a0c0; border: 1px solid var(--border-color); height: 400px; overflow-y: auto; }
+    .debug-item { margin-bottom: 8px; border-left: 4px solid #4a4a6a; padding-left: 12px; }
+    .debug-item.success { border-color: var(--success-500); color: #c0f0c0; }
+    .debug-item.error { border-color: var(--danger-500); color: #f0c0c0; }
+    .debug-item.info { border-color: var(--accent-500); }
+  </style>
+</head>
+<body>
+  <div class="container" style="padding-top: 50px;">
+    <h1>Supabase Connection Debugger</h1>
+    <p>This tool will check your project's connection to Supabase and verify the database structure.</p>
+    
+    <div id="debug-log" class="debug-log">
+      <div class="debug-item info">Initializing debugger...</div>
+    </div>
+
+    <div style="margin-top: 20px; display: flex; gap: 10px;">
+      <button class="btn btn-primary" onclick="runDiagnostics()">Run Diagnostics</button>
+      <button class="btn btn-ghost" onclick="clearSession()">Clear Local Session</button>
+      <a href="/index.html" class="btn btn-ghost">Back to Login</a>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script type="module">
+    import { supabase, SUPABASE_URL } from './js/services/supabaseClient.js';
+    import { authService } from './js/services/authService.js?v=3';
+
+    const logEl = document.getElementById('debug-log');
+
+    function log(msg, type = 'info') {
+      const item = document.createElement('div');
+      item.className = `debug-item ${type}`;
+      item.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+      logEl.appendChild(item);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    async function runDiagnostics() {
+      log('--- Starting Diagnostics ---');
+      log(`Connecting to: ${SUPABASE_URL}`);
+      
+      try {
+        // 1. Session Check
+        const session = await authService.getSession();
+        if (!session) {
+          log('Session: No active session found. You are not logged in.', 'error');
+        } else {
+          log(`Session: Logged in as ${session.user.email} (ID: ${session.user.id})`, 'success');
+        }
+
+        // 2. Table Check: profiles
+        log('Table: Checking "profiles"...');
+        const { data: profiles, error: pError } = await supabase.from('profiles').select('id').limit(1);
+        if (pError) {
+          log(`Profiles Error: ${pError.code} - ${pError.message}`, 'error');
+        } else {
+          log('Profiles Table: Accessible', 'success');
+        }
+
+        // 3. Table Check: sessions
+        log('Table: Checking "sessions"...');
+        const { error: sError } = await supabase.from('sessions').select('id').limit(1);
+        if (sError) log(`Sessions Error: ${sError.code} - ${sError.message}`, 'error');
+        else log('Sessions Table: Accessible', 'success');
+
+        // 4. Auth Service Creation Check
+        if (session) {
+          log('Profile: Attempting to ensure profile exists...');
+          try {
+            const profile = await authService.ensureProfile(session.user);
+            log(`Profile: Verified for user (Role: ${profile.role})`, 'success');
+          } catch (e) {
+            log(`Profile Creation Error: ${e.code} - ${e.message}`, 'error');
+            if (e.message.includes('permission denied')) {
+              log('HINT: This usually means RLS policies are missing for "INSERT" on profiles.', 'info');
+            }
+          }
+        }
+
+      } catch (err) {
+        log(`Fatal Error: ${err.message}`, 'error');
+      }
+      log('--- Diagnostics Complete ---');
+    }
+
+    window.runDiagnostics = runDiagnostics;
+    window.clearSession = () => {
+      localStorage.clear();
+      log('Local Storage cleared. Please refresh.', 'info');
+    };
+
+    runDiagnostics();
+  </script>
+</body>
+</html>

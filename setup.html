@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Set up your AI interview practice session with a smart wizard. Paste a Job Description or customize your rounds.">
+  <title>Session Setup — InterviewAI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages/setup.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%237c5cfc'/><text x='16' y='23' text-anchor='middle' fill='white' font-size='18' font-weight='bold'>AI</text></svg>">
+</head>
+<body>
+  <div class="animated-bg"></div>
+  <div class="page-wrapper">
+    <div id="navbar-container"></div>
+    <main class="page-content">
+      <div class="container">
+        <div class="setup-header animate-fade-in-up">
+          <h1>Configure Your <span class="text-gradient">Interview</span></h1>
+          <p>Follow the steps to set up a tailored interview experience</p>
+        </div>
+
+        <!-- ── Wizard Progress Bar ── -->
+        <div class="wizard-progress animate-fade-in-up stagger-1" id="wizard-progress">
+          <div class="wizard-step active" data-step="1">
+            <div class="wizard-step-num">1</div>
+            <div class="wizard-step-label">Job Description</div>
+          </div>
+          <div class="wizard-connector"></div>
+          <div class="wizard-step" data-step="2">
+            <div class="wizard-step-num">2</div>
+            <div class="wizard-step-label">AI Analysis</div>
+          </div>
+          <div class="wizard-connector"></div>
+          <div class="wizard-step" data-step="3">
+            <div class="wizard-step-num">3</div>
+            <div class="wizard-step-label">Customize</div>
+          </div>
+          <div class="wizard-connector"></div>
+          <div class="wizard-step" data-step="4">
+            <div class="wizard-step-num">4</div>
+            <div class="wizard-step-label">Preview</div>
+          </div>
+        </div>
+
+        <!-- ══════════════════════════════════════════ -->
+        <!-- STEP 1: Job Description                    -->
+        <!-- ══════════════════════════════════════════ -->
+        <div class="wizard-panel active" id="step-1">
+          <div class="setup-card card card-glass animate-fade-in-up stagger-2">
+            <div class="setup-section">
+              <div class="setup-section-title">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                Paste a Job Description
+                <span class="optional-badge">(Recommended)</span>
+              </div>
+              <p class="setup-hint">Paste a JD to auto-fill your interview settings with AI analysis. You can also skip to configure manually.</p>
+
+              <!-- Saved JDs Dropdown -->
+              <div class="saved-jd-section hidden" id="saved-jd-section">
+                <select class="saved-jd-select" id="saved-jd-select" onchange="loadSavedJD(this.value)">
+                  <option value="">📋 Load from previous sessions...</option>
+                </select>
+              </div>
+
+              <div class="jd-input-wrapper">
+                <textarea class="jd-textarea" id="jd-input" placeholder="Paste the full Job Description here...&#10;&#10;Example: We are looking for a Senior Full Stack Developer with 5+ years of experience in React, Node.js, and PostgreSQL..."
+                  rows="8" oninput="handleJDInput()"></textarea>
+                <div class="jd-actions">
+                  <span class="jd-char-count" id="jd-char-count">0 characters</span>
+                  <button class="btn btn-accent btn-sm" id="analyze-jd-btn" onclick="analyzeJD()" disabled>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/></svg>
+                    Analyze with AI
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="wizard-nav">
+              <div></div>
+              <div class="wizard-nav-right">
+                <button class="btn btn-ghost" onclick="wizardSkipTo(3)">Skip — Configure Manually →</button>
+                <button class="btn btn-primary" id="step1-next" onclick="wizardNext()" disabled>
+                  Analyze & Continue
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ══════════════════════════════════════════ -->
+        <!-- STEP 2: AI Analysis Results                -->
+        <!-- ══════════════════════════════════════════ -->
+        <div class="wizard-panel" id="step-2">
+          <div class="setup-card card card-glass animate-fade-in-up">
+            <div class="setup-section">
+              <div class="setup-section-title">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                AI Analysis Complete
+              </div>
+
+              <!-- Loading State -->
+              <div id="analysis-loading" class="analysis-loading hidden">
+                <div class="spinner"></div>
+                <span>Analyzing your Job Description with AI...</span>
+              </div>
+
+              <!-- Results -->
+              <div id="analysis-results" class="hidden">
+                <div class="analysis-grid">
+                  <div class="analysis-card">
+                    <div class="analysis-card-label">Detected Role</div>
+                    <div class="analysis-card-value" id="jd-role">-</div>
+                  </div>
+                  <div class="analysis-card">
+                    <div class="analysis-card-label">Experience Level</div>
+                    <div class="analysis-card-value" id="jd-experience">-</div>
+                  </div>
+                  <div class="analysis-card">
+                    <div class="analysis-card-label">Company Type</div>
+                    <div class="analysis-card-value" id="jd-company">-</div>
+                  </div>
+                </div>
+
+                <div class="analysis-section">
+                  <div class="analysis-section-title">Required Skills</div>
+                  <div class="jd-skills" id="jd-skills"></div>
+                </div>
+
+                <div class="analysis-section" id="jd-responsibilities-section">
+                  <div class="analysis-section-title">Key Responsibilities</div>
+                  <div id="jd-responsibilities"></div>
+                </div>
+
+                <div class="ai-suggestion-panel" id="ai-suggestions">
+                  <div class="ai-suggestion-title">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+                    AI Recommendations
+                  </div>
+                  <div id="ai-suggestions-content"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="wizard-nav">
+              <button class="btn btn-secondary" onclick="wizardPrev()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+                Back
+              </button>
+              <button class="btn btn-primary" onclick="wizardNext()">
+                Customize Settings
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ══════════════════════════════════════════ -->
+        <!-- STEP 3: Customize                          -->
+        <!-- ══════════════════════════════════════════ -->
+        <div class="wizard-panel" id="step-3">
+          <div class="setup-card card card-glass animate-fade-in-up">
+
+            <!-- Role Autocomplete -->
+            <div class="setup-section">
+              <div class="setup-section-title">Job Role</div>
+              <div class="autocomplete-container">
+                <div class="search-input-wrapper">
+                  <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                  <input type="text" id="role-search-input" class="search-input" placeholder="Type a job role (e.g., Software Engineer, Data Scientist...)" autocomplete="off">
+                  <button id="clear-role-btn" class="clear-btn hidden" onclick="clearRoleSearch()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                  </button>
+                </div>
+                <div id="role-suggestions" class="suggestions-list hidden"></div>
+              </div>
+            </div>
+
+            <!-- Company Type -->
+            <div class="setup-section">
+              <div class="setup-section-title">Company Simulation</div>
+              <div class="company-toggle" id="company-toggle">
+                <div class="company-option" data-value="startup" onclick="selectCompany('startup')">
+                  <div class="option-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>
+                  </div>
+                  <div>
+                    <div class="option-name">Startup</div>
+                    <div class="option-desc">Fast-paced, hands-on roles</div>
+                  </div>
+                </div>
+                <div class="company-option" data-value="mnc" onclick="selectCompany('mnc')">
+                  <div class="option-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M12 10h.01"/><path d="M12 14h.01"/><path d="M16 10h.01"/><path d="M16 14h.01"/><path d="M8 10h.01"/><path d="M8 14h.01"/></svg>
+                  </div>
+                  <div>
+                    <div class="option-name">MNC / Enterprise</div>
+                    <div class="option-desc">Structured, process-driven</div>
+                  </div>
+                </div>
+                <div class="company-option" data-value="faang" onclick="selectCompany('faang')">
+                  <div class="option-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                  </div>
+                  <div>
+                    <div class="option-name">FAANG / Big Tech</div>
+                    <div class="option-desc">System design & advanced DSA</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Difficulty -->
+            <div class="setup-section">
+              <div class="setup-section-title">Difficulty Level</div>
+              <div id="difficulty-suggestion" class="difficulty-suggestion"></div>
+              <div class="difficulty-options" id="difficulty-options">
+                <div class="difficulty-option" data-value="easy" onclick="selectDifficulty('easy')">
+                  <div class="diff-label" style="color:var(--success-500);">Easy</div>
+                  <div class="diff-desc">Fundamentals & basics</div>
+                </div>
+                <div class="difficulty-option" data-value="medium" onclick="selectDifficulty('medium')">
+                  <div class="diff-label" style="color:var(--warning-500);">Medium</div>
+                  <div class="diff-desc">Intermediate concepts</div>
+                </div>
+                <div class="difficulty-option" data-value="hard" onclick="selectDifficulty('hard')">
+                  <div class="diff-label" style="color:var(--danger-500);">Hard</div>
+                  <div class="diff-desc">Advanced & system design</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Round Configurator -->
+            <div class="setup-section">
+              <div class="setup-section-title">Interview Rounds</div>
+              <p class="setup-hint">Toggle rounds on/off and adjust the number of questions per round.</p>
+              <div class="round-configurator" id="round-configurator"></div>
+              <button class="btn btn-secondary mt-4 w-full" id="add-round-btn" onclick="showAddRoundModal()" style="justify-content:center; border: 1px dashed var(--border-color); background: transparent;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Add Custom Round
+              </button>
+            </div>
+
+            <div class="wizard-nav">
+              <button class="btn btn-secondary" onclick="wizardPrev()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+                Back
+              </button>
+              <button class="btn btn-primary" id="step3-next" onclick="wizardNext()" disabled>
+                Preview Interview
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ══════════════════════════════════════════ -->
+        <!-- STEP 4: Preview & Start                    -->
+        <!-- ══════════════════════════════════════════ -->
+        <div class="wizard-panel" id="step-4">
+          <div class="setup-card card card-glass animate-fade-in-up">
+            <div class="setup-section">
+              <div class="setup-section-title">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                Review Your Session
+              </div>
+
+              <div class="preview-grid" id="preview-grid"></div>
+              <div class="preview-rounds" id="preview-rounds"></div>
+              <div class="preview-total" id="preview-total"></div>
+            </div>
+
+            <div class="wizard-nav">
+              <button class="btn btn-secondary" onclick="wizardPrev()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+                Back
+              </button>
+              <button class="btn btn-primary btn-lg btn-glow" id="start-btn" onclick="startInterview()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                Start Interview
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Custom Round Modal -->
+  <div id="add-round-modal" class="modal-overlay hidden">
+    <div class="modal-content card">
+      <div class="modal-header">
+        <h3 class="modal-title">Add Custom Round</h3>
+        <button class="btn btn-icon" onclick="closeAddRoundModal()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Round Name</label>
+          <input type="text" id="custom-round-name" class="form-input" placeholder="e.g. Group Discussion, System Design" autocomplete="off">
+        </div>
+        <div class="form-group mt-4">
+          <label class="form-label">Question Type</label>
+          <select id="custom-round-type" class="form-input" style="color: white; background: var(--bg-card);">
+            <option value="text">Text / Discussion</option>
+            <option value="mcq">Multiple Choice (MCQ)</option>
+            <option value="code">Coding / Technical</option>
+            <option value="voice">Voice / Speech</option>
+          </select>
+        </div>
+        <div class="form-group mt-4">
+          <label class="form-label">Number of Questions</label>
+          <input type="number" id="custom-round-count" class="form-input" value="5" min="1" max="50">
+        </div>
+      </div>
+      <div class="modal-footer" style="display:flex; justify-content:flex-end; gap:var(--space-3); margin-top:var(--space-5);">
+        <button class="btn btn-secondary" onclick="closeAddRoundModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="confirmAddRound()">Add Round</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script type="module">
+    import { initSetup } from './js/setup.js';
+    initSetup();
+  </script>
+</body>
+</html>

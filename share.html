@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Shared interview session results from InterviewAI.">
+  <title>Shared Results — InterviewAI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages/summary.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%237c5cfc'/><text x='16' y='23' text-anchor='middle' fill='white' font-size='18' font-weight='bold'>AI</text></svg>">
+</head>
+<body>
+  <div class="animated-bg"></div>
+  <div class="page-wrapper">
+    <nav class="navbar">
+      <a href="/" class="navbar-brand">
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+          <defs><linearGradient id="lg" x1="0" y1="0" x2="32" y2="32"><stop offset="0%" stop-color="#7c5cfc"/><stop offset="100%" stop-color="#0ea5e9"/></linearGradient></defs>
+          <rect width="32" height="32" rx="8" fill="url(#lg)"/>
+          <path d="M10 22V10h3l3 8 3-8h3v12h-2.5v-8l-2.5 7h-2l-2.5-7v8z" fill="white"/>
+        </svg>
+        <span>InterviewAI</span>
+      </a>
+      <div class="navbar-actions">
+        <a href="/" class="btn btn-primary btn-sm">Try InterviewAI</a>
+      </div>
+    </nav>
+    <main class="page-content">
+      <div class="container" style="max-width:800px;">
+        <div id="loading-state">
+          <div class="summary-header"><div class="skeleton skeleton-text lg" style="margin:0 auto;height:2em;max-width:300px;"></div></div>
+          <div style="display:flex;justify-content:center;margin-bottom:var(--space-8);"><div class="skeleton skeleton-circle" style="width:160px;height:160px;"></div></div>
+        </div>
+        <div id="share-content" class="hidden">
+          <div class="summary-header animate-fade-in-up">
+            <h1>Interview <span class="text-gradient">Results</span></h1>
+            <p id="share-subtitle"></p>
+          </div>
+          <div class="summary-score-section animate-fade-in-up stagger-2">
+            <div id="share-score"></div>
+            <div class="summary-score-label" id="share-label"></div>
+            <div class="summary-meta" id="share-meta"></div>
+          </div>
+          <div class="summary-stats" id="share-stats">
+            <div class="card summary-stat-card animate-fade-in-up stagger-3">
+              <div class="stat-num" id="share-answered" style="color:var(--primary-400);">-</div>
+              <div class="stat-desc">Questions Answered</div>
+            </div>
+            <div class="card summary-stat-card animate-fade-in-up stagger-4">
+              <div class="stat-num" id="share-highest" style="color:var(--success-400);">-</div>
+              <div class="stat-desc">Highest Score</div>
+            </div>
+            <div class="card summary-stat-card animate-fade-in-up stagger-5">
+              <div class="stat-num" id="share-lowest" style="color:var(--danger-400);">-</div>
+              <div class="stat-desc">Lowest Score</div>
+            </div>
+          </div>
+          <div class="summary-actions animate-fade-in-up">
+            <a href="/" class="btn btn-primary btn-lg">Start Practicing</a>
+          </div>
+        </div>
+        <div id="error-state" class="hidden">
+          <div class="empty-state">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:64px;height:64px;"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+            <h3>Session not found</h3>
+            <p>This shared report may have been removed or the link is invalid.</p>
+            <a href="/" class="btn btn-primary" style="margin-top:var(--space-4);">Go to InterviewAI</a>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script type="module">
+    import { supabase } from './js/config.js';
+    import { initTheme, renderCircularProgress, getScoreLabel, getDifficultyBadge, formatDate, getUrlParam } from './js/utils.js';
+
+    initTheme();
+
+    async function loadShared() {
+      const sessionId = getUrlParam('id');
+      if (!sessionId) { showError(); return; }
+
+      try {
+        const { data: sess, error: sErr } = await supabase
+          .from('sessions')
+          .select('*')
+          .eq('id', sessionId)
+          .eq('status', 'completed')
+          .single();
+        if (sErr || !sess) throw new Error('Not found');
+
+        const { data: questions } = await supabase
+          .from('questions')
+          .select('score')
+          .eq('session_id', sessionId)
+          .not('score', 'is', null);
+
+        const answered = questions || [];
+        const avgScore = answered.length > 0 ? answered.reduce((s, q) => s + q.score, 0) / answered.length : 0;
+        const scores = answered.map(q => q.score);
+
+        document.getElementById('loading-state').classList.add('hidden');
+        document.getElementById('share-content').classList.remove('hidden');
+
+        document.getElementById('share-subtitle').textContent = `${sess.job_role} • ${formatDate(sess.created_at)}`;
+        document.getElementById('share-score').innerHTML = renderCircularProgress(avgScore, 10, 160);
+        document.getElementById('share-label').textContent = getScoreLabel(avgScore);
+        document.getElementById('share-meta').innerHTML = getDifficultyBadge(sess.difficulty) + ` <span style="font-size:var(--text-sm);color:var(--text-secondary);">• ${answered.length} questions</span>`;
+        document.getElementById('share-answered').textContent = answered.length;
+        document.getElementById('share-highest').textContent = scores.length ? Math.max(...scores).toFixed(1) : '-';
+        document.getElementById('share-lowest').textContent = scores.length ? Math.min(...scores).toFixed(1) : '-';
+      } catch (err) {
+        showError();
+      }
+    }
+
+    function showError() {
+      document.getElementById('loading-state').classList.add('hidden');
+      document.getElementById('error-state').classList.remove('hidden');
+    }
+
+    loadShared();
+  </script>
+</body>
+</html>

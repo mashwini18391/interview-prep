@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Practice your interview skills with AI-generated multi-round questions.">
+  <title>Interview Session — InterviewAI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages/interview.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%237c5cfc'/><text x='16' y='23' text-anchor='middle' fill='white' font-size='18' font-weight='bold'>AI</text></svg>">
+</head>
+<body>
+  <div class="animated-bg"></div>
+  <div class="page-wrapper">
+    <div id="navbar-container"></div>
+    <main class="page-content">
+      <div class="container">
+        <!-- Header -->
+        <div class="interview-header animate-fade-in-up" id="interview-header">
+          <div class="interview-meta">
+            <span class="badge badge-primary" id="role-badge">Loading...</span>
+            <span class="badge" id="difficulty-badge">-</span>
+          </div>
+          <div class="interview-progress">
+            <span class="progress-label" id="progress-label">0 / 0</span>
+            <div class="progress-bar">
+              <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+            </div>
+          </div>
+          <div class="timer" id="timer">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <span id="timer-display">3:00</span>
+          </div>
+        </div>
+
+        <!-- Round Progress Stepper -->
+        <div class="round-stepper" id="round-stepper"></div>
+
+        <!-- Current Round Badge -->
+        <div class="current-round-badge" id="current-round-badge"></div>
+
+        <!-- Question Dots -->
+        <div class="question-dots" id="question-dots"></div>
+
+        <!-- Question Content -->
+        <div id="question-container">
+          <div class="card question-card skeleton-card skeleton" style="height:300px"></div>
+        </div>
+
+        <!-- Feedback Container (shown after submission) -->
+        <div id="feedback-container" class="hidden"></div>
+
+        <!-- Actions -->
+        <div class="question-actions" id="question-actions">
+          <div class="actions-left">
+            <button class="btn btn-secondary" id="prev-btn" onclick="navigateQuestion(-1)" disabled>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+              Previous
+            </button>
+          </div>
+          <div class="actions-right">
+            <button class="btn btn-ghost" id="skip-btn" onclick="skipQuestion()">Skip</button>
+            <button class="btn btn-primary" id="submit-btn" onclick="submitAnswer()" disabled>
+              Submit Answer
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Round Complete Screen (shown between rounds) -->
+        <div id="round-complete-screen" class="hidden">
+          <div class="card round-complete-card animate-scale-in">
+            <div class="round-complete-icon" id="round-complete-icon"></div>
+            <h2 id="round-complete-title">Round Complete!</h2>
+            <div class="round-complete-score" id="round-complete-score"></div>
+            <div class="round-complete-breakdown" id="round-complete-breakdown"></div>
+            <button class="btn btn-primary btn-lg" id="next-round-btn" onclick="continueToNextRound()">
+              Continue to Next Round
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Finish Banner (hidden until all answered) -->
+        <div id="finish-banner" class="hidden">
+          <div class="card finish-banner animate-scale-in">
+            <h2>🎉 Interview Complete!</h2>
+            <p>You've completed all interview rounds. View your detailed results.</p>
+            <a class="btn btn-primary btn-lg" id="view-results-btn" href="#">
+              View Results
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.46.0/min/vs/loader.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script type="module">
+    import { initInterview } from './js/interview.js';
+    initInterview();
+  </script>
+</body>
+</html>

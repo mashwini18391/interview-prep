@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="AI-powered interview preparation coach. Practice with AI-generated questions, get instant feedback, and track your progress.">
+  <title>InterviewAI — AI Interview Preparation Coach</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages/login.css">
+
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%237c5cfc'/><text x='16' y='23' text-anchor='middle' fill='white' font-size='18' font-weight='bold'>AI</text></svg>">
+</head>
+<body>
+  <div class="login-page">
+    <!-- Background orbs -->
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+
+    <div class="login-container">
+      <div class="login-card">
+        <!-- Logo -->
+        <div class="login-logo">
+          <svg viewBox="0 0 72 72" fill="none">
+            <defs>
+              <linearGradient id="logo-grad" x1="0" y1="0" x2="72" y2="72">
+                <stop offset="0%" stop-color="#7c5cfc"/>
+                <stop offset="100%" stop-color="#0ea5e9"/>
+              </linearGradient>
+            </defs>
+            <rect width="72" height="72" rx="18" fill="url(#logo-grad)"/>
+            <path d="M20 50V22h7l7 18 7-18h7v28h-6V34l-6 16h-4l-6-16v16z" fill="white" opacity="0.95"/>
+          </svg>
+        </div>
+
+        <!-- Title -->
+        <h1 class="login-title">
+          Welcome to <span class="text-gradient">InterviewAI</span>
+        </h1>
+        <p class="login-subtitle">
+          Practice interviews with AI-powered questions, get instant feedback, and master your dream job.
+        </p>
+
+        <!-- Google Sign In -->
+        <button class="btn btn-google" id="google-signin-btn" onclick="handleGoogleSignIn()">
+          <svg class="google-icon" viewBox="0 0 24 24">
+            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
+            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+          </svg>
+          Continue with Google
+        </button>
+
+        <!-- Features -->
+        <div class="login-features">
+          <div class="login-feature">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/>
+            </svg>
+            <span>AI Questions</span>
+          </div>
+          <div class="login-feature">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+            <span>Smart Feedback</span>
+          </div>
+          <div class="login-feature">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/>
+            </svg>
+            <span>Track Progress</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script type="module">
+    import { authService } from './js/services/authService.js?v=3';
+    import { initTheme } from './js/utils.js';
+
+    // Init theme
+    console.log('index.html: Initializing theme and auth check');
+    initTheme();
+
+    /**
+     * Check if already logged in and redirect to dashboard
+     */
+    async function checkAuth() {
+      console.log('index.html: Running checkAuth...');
+      try {
+        const session = await authService.getSession();
+        if (session) {
+          console.log('index.html: Authenticated session found, redirecting...');
+          window.location.href = '/dashboard.html';
+        } else {
+          console.log('index.html: No active session');
+        }
+      } catch (e) {
+        console.error('index.html: Auth check failed:', e);
+      }
+    }
+    checkAuth();
+
+    /**
+     * Handle Google Sign In
+     */
+    window.handleGoogleSignIn = async function() {
+      console.log('index.html: handleGoogleSignIn clicked');
+      const btn = document.getElementById('google-signin-btn');
+      try {
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner"></span> Connecting...';
+        await authService.signInWithGoogle();
+      } catch (error) {
+        console.error('index.html: Sign in failed:', error);
+        window.alert("Sign In Failed: " + error.message);
+        btn.disabled = false;
+        btn.innerHTML = `<svg class="google-icon" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg> Continue with Google`;
+      }
+    };
+    console.log('index.html: Module script finished loading');
+  </script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+{
+  "name": "interview-prep-coach",
+  "version": "1.0.0",
+  "description": "AI-powered Interview Preparation Coach",
+  "scripts": {
+    "dev": "npx serve@latest -l 3000",
+    "start": "npx serve@latest -l 3000",
+    "preview": "npx serve@latest -l 8080"
+  },
+  "private": true
+}

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Admin dashboard — manage users and view platform analytics.">
+  <title>Admin Dashboard — InterviewAI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages/admin.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%237c5cfc'/><text x='16' y='23' text-anchor='middle' fill='white' font-size='18' font-weight='bold'>AI</text></svg>">
+</head>
+<body>
+  <div class="animated-bg"></div>
+  <div class="page-wrapper">
+    <div id="navbar-container"></div>
+    <main class="page-content">
+      <div class="container">
+        <div class="admin-header animate-fade-in-up">
+          <div>
+            <h1>Admin <span class="text-gradient">Dashboard</span></h1>
+            <p class="text-secondary">Platform overview and user management</p>
+          </div>
+        </div>
+
+        <!-- Platform Stats -->
+        <div class="admin-stats" id="admin-stats">
+          <div class="card stat-card animate-fade-in-up stagger-1">
+            <div class="stat-icon purple">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+            <div class="stat-value" id="admin-total-users"><span class="skeleton skeleton-text sm"></span></div>
+            <div class="stat-label">Total Users</div>
+          </div>
+          <div class="card stat-card animate-fade-in-up stagger-2">
+            <div class="stat-icon blue">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+            </div>
+            <div class="stat-value" id="admin-total-sessions"><span class="skeleton skeleton-text sm"></span></div>
+            <div class="stat-label">Total Sessions</div>
+          </div>
+          <div class="card stat-card animate-fade-in-up stagger-3">
+            <div class="stat-icon green">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+            </div>
+            <div class="stat-value" id="admin-avg-score"><span class="skeleton skeleton-text sm"></span></div>
+            <div class="stat-label">Platform Avg Score</div>
+          </div>
+          <div class="card stat-card animate-fade-in-up stagger-4">
+            <div class="stat-icon orange">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+            <div class="stat-value" id="admin-total-questions"><span class="skeleton skeleton-text sm"></span></div>
+            <div class="stat-label">Questions Answered</div>
+          </div>
+        </div>
+
+        <!-- Search -->
+        <div class="admin-search animate-fade-in-up stagger-3">
+          <div class="search-input">
+            <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" class="form-input" id="user-search" placeholder="Search users by name or email..." oninput="searchUsers(this.value)">
+          </div>
+        </div>
+
+        <!-- Users Table -->
+        <div class="card admin-table-card animate-fade-in-up stagger-4">
+          <div class="table-container">
+            <table class="table" id="users-table">
+              <thead>
+                <tr>
+                  <th>User</th>
+                  <th>Sessions</th>
+                  <th>Avg Score</th>
+                  <th>Best Score</th>
+                  <th>Last Active</th>
+                  <th>Role</th>
+                </tr>
+              </thead>
+              <tbody id="users-tbody">
+                <tr><td colspan="6"><div class="skeleton" style="height:40px;"></div></td></tr>
+                <tr><td colspan="6"><div class="skeleton" style="height:40px;"></div></td></tr>
+                <tr><td colspan="6"><div class="skeleton" style="height:40px;"></div></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="pagination" id="admin-pagination"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script type="module">
+    import { initAdmin } from './js/admin.js';
+    initAdmin();
+  </script>
+</body>
+</html>
