@@ -66,12 +66,17 @@ Deno.serve(async (req: Request) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    const { data: session, error: sessionError } = await supabaseAdmin
+    let query = supabaseAdmin
       .from('sessions')
       .select('id, user_id')
-      .eq('id', session_id)
-      .eq('user_id', userId)
-      .single();
+      .eq('id', session_id);
+
+    // Only filter by user_id if we have a real one (not guest fallback)
+    if (userId && userId !== 'guest') {
+      query = query.eq('user_id', userId);
+    }
+
+    const { data: session, error: sessionError } = await query.single();
 
     if (sessionError || !session) {
       return new Response(JSON.stringify({ error: 'Session not found' }), {
@@ -175,27 +180,25 @@ Deno.serve(async (req: Request) => {
     }
 
     // ── Build the final prompt ──
-    const prompt = `You are an expert technical interviewer and interview coach.
+    const prompt = `You are a highly precise technical interviewer. Your task is to generate questions for an interview based ON THE PROVIDED CONFIGURATION AND JD.
 
-${hasJD ? `### CRITICAL INSTRUCTION ###
-A specific Job Description (JD) has been provided below. You MUST:
-1. Generate questions that are DIRECTLY tailored to the skills, tools, frameworks, and responsibilities in this JD
-2. DO NOT provide generic role-based questions — focus intensely on what the JD specifies
-3. If the JD mentions specific technologies (e.g., React, AWS, PostgreSQL), EVERY technical question should reference them
-4. Extract the core competencies from the JD and test each one
+### CRITICAL RULES:
+1. EXPLICIT COUNTS: You MUST generate EXACTLY the number of questions specified for each round. No more, no less.
+2. JD TAILORING: ${hasJD ? 'A specific Job Description (JD) is provided. You MUST generate questions that reference the specific tech stack and skills in the JD. DO NOT use generic questions.' : 'Generate questions tailored to the specified role and level.'}
+3. NO REPETITION: Do not repeat questions across rounds.
+4. JSON ONLY: Your entire response must be a single JSON object. No conversational text.
+
+${hasJD ? `### JOB DESCRIPTION CONTEXT:
 ${skillsContext}${responsibilitiesContext}${jdContext}
-` : `You are specializing in ${sanitizedRole} positions at ${sanitizedCompany} companies.`}
+` : ''}
 
-Generate a complete multi-round interview question set for a **${sanitizedDifficulty}-level ${sanitizedRole}** position at a **${sanitizedCompany}** company.
-
-**Round Structure:**
+### INTERVIEW CONFIGURATION:
+- Role: ${sanitizedDifficulty}-level ${sanitizedRole}
+- Company Context: ${sanitizedCompany} (${company_type === 'faang' ? 'Big Tech focus' : company_type === 'startup' ? 'Speed/Versatility focus' : 'Process focus'})
+- Rounds to Generate:
 ${roundInstructions.join('\n')}
 
-**Company Context (${sanitizedCompany}):**
-${company_type === 'startup' ? '- Focus on versatility, hands-on experience, scrappy problem-solving, and wearing multiple hats' :
-  company_type === 'faang' ? '- Focus on scalability, system design, algorithmic efficiency, and large-scale distributed systems' :
-  '- Focus on best practices, cross-team collaboration, process-driven approaches, and enterprise patterns'}
-
+### OUTPUT FORMAT:
 Return ONLY a JSON object with this exact structure:
 {
   "rounds": [
@@ -231,7 +234,7 @@ IMPORTANT: For MCQ questions, "options" and "correct" fields are required. For t
     console.log('generate-questions: Rounds requested:', activeRounds.map(r => `${r.id}(${r.questionCount})`).join(', '));
 
     // ── Call OpenRouter API with Fallback ──
-    const OPENROUTER_API_KEY = Deno.env.get('OPENROUTER_API_KEY');
+    const OPENROUTER_API_KEY = Deno.env.get('OPENROUTER_API_KEY')?.trim().replace(/^"|"$/g, '');
     if (!OPENROUTER_API_KEY) {
       return new Response(JSON.stringify({ error: 'OpenRouter API key not configured' }), {
         status: 500,
@@ -243,7 +246,8 @@ IMPORTANT: For MCQ questions, "options" and "correct" fields are required. For t
       'google/gemini-2.0-flash-001',
       'google/gemini-flash-1.5-8b',
       'openai/gpt-4o-mini',
-      'anthropic/claude-3-haiku'
+      'anthropic/claude-3-haiku',
+      'meta-llama/llama-3.1-8b-instruct:free'
     ];
 
     async function callOpenRouter(modelId: string) {

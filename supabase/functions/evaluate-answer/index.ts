@@ -122,7 +122,7 @@ Deno.serve(async (req: Request) => {
 
     // ─── Text / Code: AI evaluation ───
     else {
-      const OPENROUTER_API_KEY = Deno.env.get('OPENROUTER_API_KEY');
+      const OPENROUTER_API_KEY = Deno.env.get('OPENROUTER_API_KEY')?.trim().replace(/^"|"$/g, '');
       if (!OPENROUTER_API_KEY) {
         return new Response(JSON.stringify({ error: 'OpenRouter API key not configured' }), {
           status: 500,
@@ -230,7 +230,8 @@ Provide constructive, specific feedback.`;
         'google/gemini-2.0-flash-001',
         'google/gemini-flash-1.5-8b',
         'openai/gpt-4o-mini',
-        'anthropic/claude-3-haiku'
+        'anthropic/claude-3-haiku',
+        'meta-llama/llama-3.1-8b-instruct:free'
       ];
 
       async function callOpenRouter(modelId: string) {

@@ -57,6 +57,12 @@ async function callEdgeFunction(functionName, body = null, method = 'POST', isRe
     // Get session
     const { data: { session } } = await supabase.auth.getSession();
     
+    // Secure fallback: Send the user ID in a header so the Edge Function 
+    // can identify the caller even if the JWT is rejected by clock skew.
+    if (session?.user?.id) {
+      headers['x-user-id'] = session.user.id;
+    }
+    
     // Logic: Use session token on first try. If it fails with 401, use Anon Key on retry.
     const token = (!isRetry && session?.access_token) ? session.access_token : SUPABASE_ANON_KEY;
     
@@ -91,7 +97,15 @@ async function callEdgeFunction(functionName, body = null, method = 'POST', isRe
 
     if (!response.ok) {
       console.error(`AI Service: ${functionName} failed (${response.status}):`, responseData);
-      const errorMsg = responseData?.error || responseData?.message || `Edge function failed with status ${response.status}`;
+      
+      let errorMsg = responseData?.error || responseData?.message || `Edge function failed with status ${response.status}`;
+      
+      // If we have detailed error info from the backend, log it and append it to the error
+      if (responseData?.details) {
+        console.error(`AI Service: ${functionName} detail string:`, responseData.details);
+        errorMsg += `\n\nDetails: ${responseData.details}`;
+      }
+      
       throw new Error(errorMsg);
     }
 

@@ -78,7 +78,7 @@ Extract the following:
 Return a JSON object with these exact fields.`;
 
     // Call OpenRouter API
-    const OPENROUTER_API_KEY = Deno.env.get('OPENROUTER_API_KEY');
+    const OPENROUTER_API_KEY = Deno.env.get('OPENROUTER_API_KEY')?.trim().replace(/^"|"$/g, '');
     if (!OPENROUTER_API_KEY) {
       return new Response(JSON.stringify({ error: 'OpenRouter API key not configured' }), {
         status: 500,
@@ -90,11 +90,16 @@ Return a JSON object with these exact fields.`;
       'google/gemini-2.0-flash-001',
       'google/gemini-flash-1.5-8b',
       'openai/gpt-4o-mini',
-      'anthropic/claude-3-haiku'
+      'anthropic/claude-3-haiku',
+      'meta-llama/llama-3.1-8b-instruct:free'
     ];
 
     async function callOpenRouter(modelId: string) {
       console.log(`analyze-jd: Attempting analysis with model: ${modelId}`);
+      const supabaseAdmin = createClient(
+        Deno.env.get('SUPABASE_URL') ?? '',
+        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+      );
       return await fetch('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
         headers: {
