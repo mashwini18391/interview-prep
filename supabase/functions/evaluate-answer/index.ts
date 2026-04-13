@@ -226,47 +226,79 @@ Score from 1-10 where:
 Provide constructive, specific feedback.`;
       }
 
-      const llmResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
-          'HTTP-Referer': Deno.env.get('SUPABASE_URL') || '',
-          'X-Title': 'InterviewAI',
-        },
-        body: JSON.stringify({
-          model: 'google/gemini-2.0-flash-001',
-          messages: [
-            { role: 'system', content: 'You are an expert interview evaluator. Always respond with valid JSON.' },
-            { role: 'user', content: prompt }
-          ],
-          response_format: {
-            type: 'json_schema',
-            json_schema: {
-              name: 'answer_evaluation',
-              strict: true,
-              schema: {
-                type: 'object',
-                properties: {
-                  score: { type: 'number', description: 'Score from 1 to 10' },
-                  good: { type: 'string', description: 'What was good about the answer' },
-                  missing: { type: 'string', description: 'What was missing or could be improved' },
-                  ideal: { type: 'string', description: 'The ideal comprehensive answer' }
-                },
-                required: ['score', 'good', 'missing', 'ideal'],
-                additionalProperties: false
-              }
-            }
-          },
-          temperature: 0.4,
-          max_tokens: 1500
-        })
-      });
+      const MODELS = [
+        'google/gemini-2.0-flash-001',
+        'google/gemini-flash-1.5-8b',
+        'openai/gpt-4o-mini',
+        'anthropic/claude-3-haiku'
+      ];
 
-      if (!llmResponse.ok) {
-        const errText = await llmResponse.text();
-        console.error('OpenRouter error:', errText);
-        return new Response(JSON.stringify({ error: 'Failed to evaluate answer' }), {
+      async function callOpenRouter(modelId: string) {
+        console.log(`evaluate-answer: Attempting evaluation with model: ${modelId}`);
+        return await fetch('https://openrouter.ai/api/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+            'HTTP-Referer': Deno.env.get('SUPABASE_URL') || '',
+            'X-Title': 'InterviewAI',
+          },
+          body: JSON.stringify({
+            model: modelId,
+            messages: [
+              { role: 'system', content: 'You are an expert interview evaluator. Always respond with valid JSON.' },
+              { role: 'user', content: prompt }
+            ],
+            response_format: {
+              type: 'json_schema',
+              json_schema: {
+                name: 'answer_evaluation',
+                strict: true,
+                schema: {
+                  type: 'object',
+                  properties: {
+                    score: { type: 'number', description: 'Score from 1 to 10' },
+                    good: { type: 'string', description: 'What was good about the answer' },
+                    missing: { type: 'string', description: 'What was missing or could be improved' },
+                    ideal: { type: 'string', description: 'The ideal comprehensive answer' }
+                  },
+                  required: ['score', 'good', 'missing', 'ideal'],
+                  additionalProperties: false
+                }
+              }
+            },
+            temperature: 0.4,
+            max_tokens: 1500
+          })
+        });
+      }
+
+      let llmResponse;
+      let lastError = '';
+
+      for (const model of MODELS) {
+        try {
+          llmResponse = await callOpenRouter(model);
+          if (llmResponse.ok) {
+            console.log(`evaluate-answer: Successfully evaluated with ${model}`);
+            break;
+          }
+          
+          const errText = await llmResponse.text();
+          lastError = `Model ${model} failed: ${errText}`;
+          console.warn(lastError);
+        } catch (e) {
+          const errorMsg = e instanceof Error ? e.message : String(e);
+          lastError = `Model ${model} threw: ${errorMsg}`;
+          console.error(lastError);
+        }
+      }
+
+      if (!llmResponse || !llmResponse.ok) {
+        return new Response(JSON.stringify({ 
+          error: 'Failed to evaluate answer after multiple attempts',
+          details: lastError 
+        }), {
           status: 500,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });

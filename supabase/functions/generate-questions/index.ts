@@ -230,7 +230,7 @@ IMPORTANT: For MCQ questions, "options" and "correct" fields are required. For t
     console.log('generate-questions: Has JD:', hasJD);
     console.log('generate-questions: Rounds requested:', activeRounds.map(r => `${r.id}(${r.questionCount})`).join(', '));
 
-    // ── Call OpenRouter API ──
+    // ── Call OpenRouter API with Fallback ──
     const OPENROUTER_API_KEY = Deno.env.get('OPENROUTER_API_KEY');
     if (!OPENROUTER_API_KEY) {
       return new Response(JSON.stringify({ error: 'OpenRouter API key not configured' }), {
@@ -239,99 +239,132 @@ IMPORTANT: For MCQ questions, "options" and "correct" fields are required. For t
       });
     }
 
-    const llmResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
-        'HTTP-Referer': Deno.env.get('SUPABASE_URL') || '',
-        'X-Title': 'InterviewAI',
-      },
-      body: JSON.stringify({
-        model: 'google/gemini-2.0-flash-001',
-        messages: [
-          { role: 'system', content: 'You are an expert interview coach. Always respond with valid JSON containing multi-round interview questions. Follow the round structure and question counts EXACTLY as specified.' },
-          { role: 'user', content: prompt }
-        ],
-        response_format: {
-          type: 'json_schema',
-          json_schema: {
-            name: 'multi_round_questions',
-            strict: true,
-            schema: {
-              type: 'object',
-              properties: {
-                rounds: {
-                  type: 'array',
-                  items: {
-                    type: 'object',
-                    properties: {
-                      round_type: { type: 'string' },
-                      round_label: { type: 'string' },
-                      questions: {
-                        type: 'array',
-                        items: {
-                          type: 'object',
-                          properties: {
-                            text: { type: 'string' },
-                            type: { type: 'string' },
-                            options: { type: 'array', items: { type: 'string' } },
-                            correct: { type: 'string' },
-                            coding_metadata: {
-                              type: 'object',
-                              properties: {
-                                title: { type: 'string' },
-                                description: { type: 'string' },
-                                inputFormat: { type: 'string' },
-                                outputFormat: { type: 'string' },
-                                constraints: { type: 'string' },
-                                sampleInput: { type: 'string' },
-                                sampleOutput: { type: 'string' },
-                                testCases: {
-                                  type: 'array',
-                                  items: {
-                                    type: 'object',
-                                    properties: {
-                                      input: { type: 'string' },
-                                      expected: { type: 'string' }
-                                    },
-                                    required: ['input', 'expected'],
-                                    additionalProperties: false
-                                  }
-                                }
-                              },
-                              required: ['title', 'description', 'inputFormat', 'outputFormat', 'constraints', 'sampleInput', 'sampleOutput', 'testCases'],
-                              additionalProperties: false
-                            }
-                          },
-                          required: ['text', 'type'],
-                          additionalProperties: false
-                        }
-                      }
-                    },
-                    required: ['round_type', 'round_label', 'questions'],
-                    additionalProperties: false
-                  }
-                }
-              },
-              required: ['rounds'],
-              additionalProperties: false
-            }
-          }
-        },
-        temperature: 0.8,
-        max_tokens: 5000
-      })
-    });
+    const MODELS = [
+      'google/gemini-2.0-flash-001',
+      'google/gemini-flash-1.5-8b',
+      'openai/gpt-4o-mini',
+      'anthropic/claude-3-haiku'
+    ];
 
-    if (!llmResponse.ok) {
-      const errText = await llmResponse.text();
-      console.error('OpenRouter error:', errText);
-      return new Response(JSON.stringify({ error: 'Failed to generate questions' }), {
+    async function callOpenRouter(modelId: string) {
+      console.log(`generate-questions: Attempting with model: ${modelId}`);
+      return await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+          'HTTP-Referer': Deno.env.get('SUPABASE_URL') || '',
+          'X-Title': 'InterviewAI',
+        },
+        body: JSON.stringify({
+          model: modelId,
+          messages: [
+            { role: 'system', content: 'You are an expert interview coach. Always respond with valid JSON containing multi-round interview questions. Follow the round structure and question counts EXACTLY as specified.' },
+            { role: 'user', content: prompt }
+          ],
+          response_format: {
+            type: 'json_schema',
+            json_schema: {
+              name: 'multi_round_questions',
+              strict: true,
+              schema: {
+                type: 'object',
+                properties: {
+                  rounds: {
+                    type: 'array',
+                    items: {
+                      type: 'object',
+                      properties: {
+                        round_type: { type: 'string' },
+                        round_label: { type: 'string' },
+                        questions: {
+                          type: 'array',
+                          items: {
+                            type: 'object',
+                            properties: {
+                              text: { type: 'string' },
+                              type: { type: 'string' },
+                              options: { type: 'array', items: { type: 'string' } },
+                              correct: { type: 'string' },
+                              coding_metadata: {
+                                type: 'object',
+                                properties: {
+                                  title: { type: 'string' },
+                                  description: { type: 'string' },
+                                  inputFormat: { type: 'string' },
+                                  outputFormat: { type: 'string' },
+                                  constraints: { type: 'string' },
+                                  sampleInput: { type: 'string' },
+                                  sampleOutput: { type: 'string' },
+                                  testCases: {
+                                    type: 'array',
+                                    items: {
+                                      type: 'object',
+                                      properties: {
+                                        input: { type: 'string' },
+                                        expected: { type: 'string' }
+                                      },
+                                      required: ['input', 'expected'],
+                                      additionalProperties: false
+                                    }
+                                  }
+                                },
+                                required: ['title', 'description', 'inputFormat', 'outputFormat', 'constraints', 'sampleInput', 'sampleOutput', 'testCases'],
+                                additionalProperties: false
+                              }
+                            },
+                            required: ['text', 'type'],
+                            additionalProperties: false
+                          }
+                        }
+                      },
+                      required: ['round_type', 'round_label', 'questions'],
+                      additionalProperties: false
+                    }
+                  }
+                },
+                required: ['rounds'],
+                additionalProperties: false
+              }
+            }
+          },
+          temperature: 0.8,
+          max_tokens: 5000
+        })
+      });
+    }
+
+    let llmResponse;
+    let lastError = '';
+
+    for (const model of MODELS) {
+      try {
+        llmResponse = await callOpenRouter(model);
+        if (llmResponse.ok) {
+          console.log(`generate-questions: Successfully generated questions with ${model}`);
+          break;
+        }
+        
+        const errText = await llmResponse.text();
+        lastError = `Model ${model} failed: ${errText}`;
+        console.warn(lastError);
+      } catch (e) {
+        const errorMsg = e instanceof Error ? e.message : String(e);
+        lastError = `Model ${model} threw: ${errorMsg}`;
+        console.error(lastError);
+      }
+    }
+
+    if (!llmResponse || !llmResponse.ok) {
+      return new Response(JSON.stringify({ 
+        error: 'Failed to generate questions after multiple attempts',
+        details: lastError 
+      }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
+
 
     const llmData = await llmResponse.json();
     const content = llmData.choices?.[0]?.message?.content;

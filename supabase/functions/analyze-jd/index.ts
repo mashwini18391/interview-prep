@@ -86,69 +86,101 @@ Return a JSON object with these exact fields.`;
       });
     }
 
-    const llmResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
-        'HTTP-Referer': Deno.env.get('SUPABASE_URL') || '',
-        'X-Title': 'InterviewAI',
-      },
-      body: JSON.stringify({
-        model: 'google/gemini-2.0-flash-001',
-        messages: [
-          { role: 'system', content: 'You are an expert HR analyst. Always respond with valid JSON.' },
-          { role: 'user', content: prompt }
-        ],
-        response_format: {
-          type: 'json_schema',
-          json_schema: {
-            name: 'jd_analysis',
-            strict: true,
-            schema: {
-              type: 'object',
-              properties: {
-                required_skills: {
-                  type: 'array',
-                  items: { type: 'string' },
-                  description: 'List of required skills'
-                },
-                experience_level: {
-                  type: 'string',
-                  description: 'Experience level: entry, junior, mid, mid-senior, senior, lead, principal'
-                },
-                key_responsibilities: {
-                  type: 'array',
-                  items: { type: 'string' },
-                  description: 'Key job responsibilities'
-                },
-                role_type: {
-                  type: 'string',
-                  description: 'Closest matching role type'
-                },
-                suggested_difficulty: {
-                  type: 'string',
-                  description: 'Suggested difficulty: easy, medium, hard'
-                },
-                company_type: {
-                  type: 'string',
-                  description: 'Company type: startup or mnc'
-                }
-              },
-              required: ['required_skills', 'experience_level', 'key_responsibilities', 'role_type', 'suggested_difficulty', 'company_type'],
-              additionalProperties: false
-            }
-          }
-        },
-        temperature: 0.3,
-        max_tokens: 1500
-      })
-    });
+    const MODELS = [
+      'google/gemini-2.0-flash-001',
+      'google/gemini-flash-1.5-8b',
+      'openai/gpt-4o-mini',
+      'anthropic/claude-3-haiku'
+    ];
 
-    if (!llmResponse.ok) {
-      const errText = await llmResponse.text();
-      console.error('OpenRouter error:', errText);
-      return new Response(JSON.stringify({ error: 'Failed to analyze job description' }), {
+    async function callOpenRouter(modelId: string) {
+      console.log(`analyze-jd: Attempting analysis with model: ${modelId}`);
+      return await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+          'HTTP-Referer': Deno.env.get('SUPABASE_URL') || '',
+          'X-Title': 'InterviewAI',
+        },
+        body: JSON.stringify({
+          model: modelId,
+          messages: [
+            { role: 'system', content: 'You are an expert HR analyst. Always respond with valid JSON.' },
+            { role: 'user', content: prompt }
+          ],
+          response_format: {
+            type: 'json_schema',
+            json_schema: {
+              name: 'jd_analysis',
+              strict: true,
+              schema: {
+                type: 'object',
+                properties: {
+                  required_skills: {
+                    type: 'array',
+                    items: { type: 'string' },
+                    description: 'List of required skills'
+                  },
+                  experience_level: {
+                    type: 'string',
+                    description: 'Experience level: entry, junior, mid, mid-senior, senior, lead, principal'
+                  },
+                  key_responsibilities: {
+                    type: 'array',
+                    items: { type: 'string' },
+                    description: 'Key job responsibilities'
+                  },
+                  role_type: {
+                    type: 'string',
+                    description: 'Closest matching role type'
+                  },
+                  suggested_difficulty: {
+                    type: 'string',
+                    description: 'Suggested difficulty: easy, medium, hard'
+                  },
+                  company_type: {
+                    type: 'string',
+                    description: 'Company type: startup or mnc'
+                  }
+                },
+                required: ['required_skills', 'experience_level', 'key_responsibilities', 'role_type', 'suggested_difficulty', 'company_type'],
+                additionalProperties: false
+              }
+            }
+          },
+          temperature: 0.3,
+          max_tokens: 1500
+        })
+      });
+    }
+
+    let llmResponse;
+    let lastError = '';
+
+    for (const model of MODELS) {
+      try {
+        llmResponse = await callOpenRouter(model);
+        if (llmResponse.ok) {
+          console.log(`analyze-jd: Successfully analyzed with ${model}`);
+          break;
+        }
+        
+        const errText = await llmResponse.text();
+        lastError = `Model ${model} failed: ${errText}`;
+        console.warn(lastError);
+      } catch (e) {
+        const errorMsg = e instanceof Error ? e.message : String(e);
+        lastError = `Model ${model} threw: ${errorMsg}`;
+        console.error(lastError);
+      }
+    }
+
+    if (!llmResponse || !llmResponse.ok) {
+      return new Response(JSON.stringify({ 
+        error: 'Failed to analyze job description after multiple attempts',
+        details: lastError 
+      }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
